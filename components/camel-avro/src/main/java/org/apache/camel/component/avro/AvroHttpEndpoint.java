@@ -58,6 +58,6 @@ public class AvroHttpEndpoint extends AvroEndpoint {
      */
     @Override
     public Consumer createConsumer(Processor processor) throws Exception {
-        return new AvroHttpConsumer(this, processor);
+        return new AvroConsumer(this, processor);
     }
 }

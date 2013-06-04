@@ -19,6 +19,8 @@ package org.apache.camel.component.avro;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.avro.Protocol;
 
@@ -30,6 +32,7 @@ import org.apache.camel.util.URISupport;
 public class AvroComponent extends DefaultComponent {
 
     private AvroConfiguration configuration;
+    private ConcurrentMap<String, AvroResponder> responderRegistry = new ConcurrentHashMap<String, AvroResponder>();
 
     public AvroComponent() {
     }
@@ -37,7 +40,6 @@ public class AvroComponent extends DefaultComponent {
     public AvroComponent(CamelContext context) {
         super(context);
     }
-
 
     /**
      * A factory method allowing derived components to create a new endpoint
@@ -92,6 +94,36 @@ public class AvroComponent extends DefaultComponent {
         if (config.getProtocol() == null) {
             throw new IllegalArgumentException("Avro configuration does not contain protocol");
         }
+    }
+    
+    /**
+     * Registers new responder with uri as key. Registers consumer in responder.
+     * In case if responder is already registered by this uri then just registers consumer.
+     * 
+     * @param uri			URI of the endpoint without message name
+     * @param messageName	message name
+     * @param consumer		consumer that will be registered in providers` registry
+     * @throws Exception
+     */
+    public void register(String uri, String messageName, AvroConsumer consumer) throws Exception {
+    	AvroResponder responder = responderRegistry.get(uri);
+    	if(responder == null) {
+    		responder = new AvroResponder(consumer);
+    		responderRegistry.put(uri, responder);
+    	}
+    	responder.register(messageName, consumer);
+    }
+    
+    /**
+     * Calls unregister of consumer by appropriate message name.
+     * In case if all consumers are unregistered then it removes responder from the registry.
+     * 
+     * @param uri			URI of the endpoint without message name
+     * @param messageName	message name
+     * @param consumer		consumer that will be unregistered in providers` registry
+     */
+    public void unregister(String uri, String messageName, AvroConsumer consumer) {
+    	if(responderRegistry.get(uri).unregister(messageName)) responderRegistry.remove(uri);
     }
 
     public AvroConfiguration getConfiguration() {

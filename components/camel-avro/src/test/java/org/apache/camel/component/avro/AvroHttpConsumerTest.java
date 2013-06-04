@@ -41,11 +41,14 @@ public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {
+            public void configure() throws Exception {           	
                 //In Only
                 from("avro:http:localhost:" + avroPort).choice()
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'put'}").process(new PutProcessor(keyValue))
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'get'}").process(new GetProcessor(keyValue));
+                
+                from("avro:http:localhost:" + avroPort + "/put").process(new PutProcessor(keyValue));
+                from("avro:http:localhost:" + avroPort + "/get").process(new GetProcessor(keyValue));
             }
         };
     }

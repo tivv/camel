@@ -25,6 +25,7 @@ import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.ServicePoolAware;
 import org.apache.camel.impl.DefaultAsyncProducer;
+import org.apache.commons.lang.StringUtils;
 
 public abstract class AvroProducer extends DefaultAsyncProducer implements ServicePoolAware {
 
@@ -53,7 +54,13 @@ public abstract class AvroProducer extends DefaultAsyncProducer implements Servi
         }
 
         try {
-            requestor.request(exchange.getIn().getHeader(AvroConstants.AVRO_MESSAGE_NAME, String.class), wrapObjectToArray(request), new Callback<Object>() {
+        	String messageName;
+        	if(!StringUtils.isEmpty(exchange.getIn().getHeader(AvroConstants.AVRO_MESSAGE_NAME, String.class)))
+        		messageName = exchange.getIn().getHeader(AvroConstants.AVRO_MESSAGE_NAME, String.class);
+        	else
+        		messageName = getEndpoint().getConfiguration().getMessageName();
+        	
+            requestor.request(messageName, wrapObjectToArray(request), new Callback<Object>() {
                 @Override
                 public void handleResult(Object result) {
                     // got result from avro, so set it on the exchange and invoke the callback

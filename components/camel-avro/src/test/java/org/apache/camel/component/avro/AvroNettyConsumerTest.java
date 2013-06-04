@@ -46,6 +46,9 @@ public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
                 from("avro:netty:localhost:" + avroPort).choice()
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'put'}").process(new PutProcessor(keyValue))
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'get'}").process(new GetProcessor(keyValue));
+
+                from("avro:netty:localhost:" + avroPort + "/put").process(new PutProcessor(keyValue));
+                from("avro:netty:localhost:" + avroPort + "/get").process(new GetProcessor(keyValue));
             }
         };
     }

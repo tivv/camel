@@ -62,7 +62,15 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         template.sendBodyAndHeader("direct:in", request, AvroConstants.AVRO_MESSAGE_NAME, "put");
         Assert.assertEquals(value, keyValue.getStore().get(key));
     }
-
+    
+    @Test
+    public void testInOnlyWithMessageNameInRoute() throws InterruptedException {
+        Key key = Key.newBuilder().setKey("1").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        Object[] request = {key, value};
+        template.sendBody("direct:in-message-name", request);
+        Assert.assertEquals(value, keyValue.getStore().get(key));
+    }
 
     @Test
     public void testInOut() throws InterruptedException {
@@ -75,6 +83,20 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived(value);
         template.sendBodyAndHeader("direct:inout", key, AvroConstants.AVRO_MESSAGE_NAME, "get");
+        mock.assertIsSatisfied(10000);
+    }
+    
+    @Test
+    public void testInOutMessageNameInRoute() throws InterruptedException {
+        keyValue.getStore().clear();
+        Key key = Key.newBuilder().setKey("2").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        keyValue.getStore().put(key, value);
+
+        MockEndpoint mock = getMockEndpoint("mock:result-inout-message-name");
+        mock.expectedMessageCount(1);
+        mock.expectedBodiesReceived(value);
+        template.sendBody("direct:inout-message-name", key);
         mock.assertIsSatisfied(10000);
     }
 

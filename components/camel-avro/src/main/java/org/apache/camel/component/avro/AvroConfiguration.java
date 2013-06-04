@@ -22,6 +22,8 @@ import java.util.Map;
 import org.apache.avro.Protocol;
 
 import org.apache.camel.RuntimeCamelException;
+import org.apache.commons.lang.StringUtils;
+import static org.apache.camel.component.avro.AvroConstants.*;
 
 public class AvroConfiguration implements Cloneable {
 
@@ -31,8 +33,9 @@ public class AvroConfiguration implements Cloneable {
     private String protocolLocation;
     private String protocolClassName;
     private String transport;
+    private String messageName;
 
-    public AvroConfiguration copy() {
+	public AvroConfiguration copy() {
         try {
             AvroConfiguration answer = (AvroConfiguration) clone();
             return answer;
@@ -44,12 +47,18 @@ public class AvroConfiguration implements Cloneable {
     public void parseURI(URI uri, Map<String, Object> parameters, AvroComponent component) throws Exception {
         transport = uri.getScheme();
 
-        if ((!transport.equalsIgnoreCase("http")) && (!transport.equalsIgnoreCase("netty"))) {
+        if ((!AVRO_HTTP_TRANSPORT.equalsIgnoreCase(transport)) && (!AVRO_NETTY_TRANSPORT.equalsIgnoreCase(transport))) {
             throw new IllegalArgumentException("Unrecognized Avro IPC transport: " + protocol + " for uri: " + uri);
         }
 
         setHost(uri.getHost());
         setPort(uri.getPort());
+        
+        if((uri.getPath() != null) && (StringUtils.indexOf(uri.getPath(), AVRO_MESSAGE_NAME_SEPARATOR) != -1)) {
+        	String path = StringUtils.substringAfter(uri.getPath(), AVRO_MESSAGE_NAME_SEPARATOR);
+        	if(!path.contains(AVRO_MESSAGE_NAME_SEPARATOR)) setMessageName(path);
+        	else throw new IllegalArgumentException("Unrecognized Avro message name: " + path + " for uri: " + uri);
+        }
     }
 
     public String getHost() {
@@ -99,4 +108,12 @@ public class AvroConfiguration implements Cloneable {
     public void setProtocolClassName(String protocolClassName) {
         this.protocolClassName = protocolClassName;
     }
+
+	public String getMessageName() {
+		return messageName;
+	}
+
+	public void setMessageName(String messageName) {
+		this.messageName = messageName;
+	}
 }

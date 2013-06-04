@@ -34,9 +34,15 @@ public class AvroNettyProducerTest extends AvroProducerTestSupport {
             public void configure() throws Exception {
                 //In Only
                 from("direct:in").to("avro:netty:localhost:" + avroPort);
+                
+                //In Only with message in route
+                from("direct:in-message-name").to("avro:netty:localhost:" + avroPort + "/put");
 
                 //InOut
                 from("direct:inout").to("avro:netty:localhost:" + avroPort).to("mock:result-inout");
+                
+                //InOut
+                from("direct:inout-message-name").to("avro:netty:localhost:" + avroPort + "/get").to("mock:result-inout-message-name");
             }
         };
     }
