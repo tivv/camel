@@ -35,6 +35,10 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
 
     Transceiver transceiver;
     Requestor requestor;
+    
+    Transceiver transceiverMessageInRoute;
+    Requestor requestorMessageInRoute;
+    
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
 
     protected abstract void initializeTranceiver() throws IOException;
@@ -47,7 +51,6 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         }
     }
 
-
     @Test
     public void testInOnly() throws Exception {
         initializeTranceiver();
@@ -56,7 +59,15 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Object[] request = {key, value};
         requestor.request("put", request);
     }
-
+    
+    @Test
+    public void testInOnlyMessageInRoute() throws Exception {
+        initializeTranceiver();
+        Key key = Key.newBuilder().setKey("1").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        Object[] request = {key, value};
+        requestorMessageInRoute.request("put", request);
+    }
 
     @Test
     public void testInOut() throws Exception {
@@ -67,6 +78,18 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         keyValue.getStore().put(key, value);
         Object[] request = {key};
         Object response = requestor.request("get", request);
+        Assert.assertEquals(value, response);
+    }
+    
+    @Test
+    public void testInOutMessageInRoute() throws Exception {
+        initializeTranceiver();
+        keyValue.getStore().clear();
+        Key key = Key.newBuilder().setKey("2").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        keyValue.getStore().put(key, value);
+        Object[] request = {key};
+        Object response = requestorMessageInRoute.request("get", request);
         Assert.assertEquals(value, response);
     }
 

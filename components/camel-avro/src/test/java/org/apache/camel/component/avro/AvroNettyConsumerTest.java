@@ -30,12 +30,16 @@ import org.apache.camel.component.avro.processors.PutProcessor;
 
 public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
 
-    static int avroPort = setupFreePort("avroport");
+	static int avroPort = setupFreePort("avroport");
+    static int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
 
     @Override
     protected void initializeTranceiver() throws IOException {
         transceiver = new NettyTransceiver(new InetSocketAddress("localhost", avroPort));
         requestor = new SpecificRequestor(KeyValueProtocol.class, transceiver);
+        
+        transceiverMessageInRoute = new NettyTransceiver(new InetSocketAddress("localhost", avroPortMessageInRoute));
+        requestorMessageInRoute = new SpecificRequestor(KeyValueProtocol.class, transceiverMessageInRoute);
     }
 
     protected RouteBuilder createRouteBuilder() throws Exception {
@@ -47,8 +51,8 @@ public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'put'}").process(new PutProcessor(keyValue))
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'get'}").process(new GetProcessor(keyValue));
 
-                from("avro:netty:localhost:" + avroPort + "/put").process(new PutProcessor(keyValue));
-                from("avro:netty:localhost:" + avroPort + "/get").process(new GetProcessor(keyValue));
+                from("avro:netty:localhost:" + avroPortMessageInRoute + "/put").process(new PutProcessor(keyValue));
+                from("avro:netty:localhost:" + avroPortMessageInRoute + "/get").process(new GetProcessor(keyValue));
             }
         };
     }
