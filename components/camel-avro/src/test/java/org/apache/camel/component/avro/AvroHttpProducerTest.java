@@ -27,7 +27,7 @@ import org.apache.camel.builder.RouteBuilder;
 
 public class AvroHttpProducerTest extends AvroProducerTestSupport {
 
-    static int avroPort = setupFreePort("avroport");
+    int avroPort = setupFreePort("avroport");
 
     @Override
     protected void initializeServer() throws IOException {

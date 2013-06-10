@@ -28,9 +28,9 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 
 public class AvroTestSupport extends CamelTestSupport {
 
+	private int port = 9100;
 
-    public static int setupFreePort(String name) {
-        int port = -1;
+    public int setupFreePort(String name) {
         FileInputStream fis = null;
         FileOutputStream fos = null;
         try {
@@ -40,15 +40,17 @@ public class AvroTestSupport extends CamelTestSupport {
                 propertiesFile.createNewFile();
             }
             fis = new FileInputStream(propertiesFile);
-            fos = new FileOutputStream(propertiesFile);
+
             properties.load(fis);
             if (properties.contains(name)) {
                 return Integer.parseInt((String) properties.get(name));
             } else {
                 // find a free port number from 9100 onwards, and write that in the custom.properties file
                 // which we will use for the unit tests, to avoid port number in use problems
-                port = AvailablePortFinder.getNextAvailable(9100);
+            	port = AvailablePortFinder.getNextAvailable(++port);
                 properties.put(name, String.valueOf(port));
+                
+                fos = new FileOutputStream(propertiesFile);
                 properties.store(fos, "avro");
             }
         } catch (IOException e) {

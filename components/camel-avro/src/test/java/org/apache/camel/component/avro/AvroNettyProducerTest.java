@@ -26,7 +26,7 @@ import org.apache.camel.builder.RouteBuilder;
 
 public class AvroNettyProducerTest extends AvroProducerTestSupport {
 
-    static int avroPort = setupFreePort("avroport");
+    int avroPort = setupFreePort("avroport");
 
     public RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {

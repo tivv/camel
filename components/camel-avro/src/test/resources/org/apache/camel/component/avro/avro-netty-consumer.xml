@@ -39,12 +39,12 @@
         </route>
         
         <route>
-            <from uri="avro:netty:localhost:{{avroport}}/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
+            <from uri="avro:netty:localhost:{{avroPortMessageInRoute}}/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
             <process ref="putProcessor"/>
         </route>
         
         <route>
-            <from uri="avro:netty:localhost:{{avroport}}/get?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
+            <from uri="avro:netty:localhost:{{avroPortMessageInRoute}}/get?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
             <process ref="getProcessor"/>
         </route>
 

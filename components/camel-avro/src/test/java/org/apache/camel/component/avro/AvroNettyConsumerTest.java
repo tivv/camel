@@ -30,8 +30,8 @@ import org.apache.camel.component.avro.processors.PutProcessor;
 
 public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
 
-	static int avroPort = setupFreePort("avroport");
-    static int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
+	int avroPort = setupFreePort("avroport");
+    int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
 
     @Override
     protected void initializeTranceiver() throws IOException {
