@@ -31,7 +31,10 @@ import org.apache.avro.specific.SpecificData;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.util.ExchangeHelper;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.mortbay.log.Log;
+
 import static org.apache.camel.component.avro.AvroConstants.*;
 
 public class AvroResponder extends SpecificResponder {
@@ -54,7 +57,10 @@ public class AvroResponder extends SpecificResponder {
     }
 
     @Override
-    public Object respond(Protocol.Message message, Object request) {
+    public Object respond(Protocol.Message message, Object request) throws AvroComponentException {
+    	if(MapUtils.isNotEmpty(getLocal().getMessages()) && !getLocal().getMessages().containsKey(message.getName()))
+        	throw new AvroComponentException("No message with name: " + message.getName() + " defined in protocol.");
+    	
         Object response;
         int numParams = message.getRequest().getFields().size();
         Object[] params = new Object[numParams];
@@ -69,6 +75,8 @@ public class AvroResponder extends SpecificResponder {
         AvroConsumer consumer = this.defaultConsumer;
         if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.get(message.getName()) != null)
         	consumer = this.consumerRegistry.get(message.getName());
+        
+        if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
         
         Exchange exchange = consumer.getEndpoint().createExchange(message, params);
 
@@ -95,7 +103,7 @@ public class AvroResponder extends SpecificResponder {
         }
         return response;
     }
-
+    
     /**
      * Registers consumer by appropriate message name as key in registry.
      *  
@@ -109,7 +117,7 @@ public class AvroResponder extends SpecificResponder {
     			throw new AvroComponentException("Consumer default consumer already registrered for uri: " + consumer.getEndpoint().getEndpointUri());
     		this.defaultConsumer = consumer;
     	} else {
-    		if (consumerRegistry.putIfAbsent(messageName, consumer)!=null) {
+    		if (consumerRegistry.putIfAbsent(messageName, consumer) != null) {
     			throw new AvroComponentException("Consumer already registrered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
     		}
     	}
@@ -120,11 +128,17 @@ public class AvroResponder extends SpecificResponder {
      * Stops server in case if all consumers are unregistered and default consumer is absent or stopped. 
      * 
      * @param messageName message name
-     * @return
+     * @return true if all consumers are unregistered and defaultConsumer is absent or null.
+     *         It means that this responder can be unregistered. 
      */
     public boolean unregister(String messageName) {
-    	if(!StringUtils.isEmpty(messageName)) consumerRegistry.remove(messageName);
-    	if((defaultConsumer == null || StringUtils.isEmpty(messageName)) && consumerRegistry.isEmpty()) {
+    	if(!StringUtils.isEmpty(messageName)) {
+    		if(consumerRegistry.remove(messageName) == null)
+    			Log.warn("Consumer with message name " + messageName + " was already unregistered.");
+    	}
+    	else defaultConsumer = null;
+    	
+    	if((defaultConsumer == null) && (consumerRegistry.isEmpty())) {
             if (server != null) {
                 server.close();
             }

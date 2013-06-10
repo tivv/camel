@@ -16,12 +16,9 @@
  */
 package org.apache.camel.component.avro;
 
-import static org.apache.camel.component.avro.AvroConstants.AVRO_MESSAGE_NAME_SEPARATOR;
-
 import org.apache.camel.Endpoint;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultConsumer;
-import org.apache.commons.lang.StringUtils;
 
 public class AvroConsumer extends DefaultConsumer {
 
@@ -36,16 +33,12 @@ public class AvroConsumer extends DefaultConsumer {
     
     @Override
     protected void doStart() throws Exception {
-    	String uri = StringUtils.substringBefore(getEndpoint().getEndpointUri(), AVRO_MESSAGE_NAME_SEPARATOR);
-    	if(StringUtils.isEmpty(uri)) uri = getEndpoint().getEndpointUri();
-    	((AvroComponent) getEndpoint().getComponent()).register(uri, getEndpoint().getConfiguration().getMessageName(), this);
+    	((AvroComponent) getEndpoint().getComponent()).register(getEndpoint().getConfiguration().getUriAuthority(), getEndpoint().getConfiguration().getMessageName(), this);
     }
 
     @Override
     protected void doStop() throws Exception {
         super.doStop();
-        String uri = StringUtils.substringBefore(getEndpoint().getEndpointUri(), AVRO_MESSAGE_NAME_SEPARATOR);
-    	if(StringUtils.isEmpty(uri)) uri = getEndpoint().getEndpointUri();
-        ((AvroComponent) getEndpoint().getComponent()).unregister(uri, getEndpoint().getConfiguration().getMessageName(), this);
+        ((AvroComponent) getEndpoint().getComponent()).unregister(getEndpoint().getConfiguration().getUriAuthority(), getEndpoint().getConfiguration().getMessageName(), this);
     }
 }

@@ -29,9 +29,6 @@ import org.apache.camel.component.avro.processors.GetProcessor;
 import org.apache.camel.component.avro.processors.PutProcessor;
 
 public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
-	
-	int avroPort = setupFreePort("avroport");
-    int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
 
     @Override
     protected void initializeTranceiver() throws IOException {
@@ -40,6 +37,9 @@ public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
         
         transceiverMessageInRoute = new HttpTransceiver(new URL("http://localhost:" + avroPortMessageInRoute));
         requestorMessageInRoute = new SpecificRequestor(KeyValueProtocol.class, transceiverMessageInRoute);
+        
+        transceiverForWrongMessages = new HttpTransceiver(new URL("http://localhost:" + avroPortForWrongMessages));
+        requestorForWrongMessages = new SpecificRequestor(KeyValueProtocol.class, transceiverForWrongMessages);
     }
 
     protected RouteBuilder createRouteBuilder() throws Exception {
@@ -53,6 +53,8 @@ public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
                 
                 from("avro:http:localhost:" + avroPortMessageInRoute + "/put").process(new PutProcessor(keyValue));
                 from("avro:http:localhost:" + avroPortMessageInRoute + "/get").process(new GetProcessor(keyValue));
+                
+                from("avro:http:localhost:" + avroPortForWrongMessages + "/put").process(new PutProcessor(keyValue));
             }
         };
     }

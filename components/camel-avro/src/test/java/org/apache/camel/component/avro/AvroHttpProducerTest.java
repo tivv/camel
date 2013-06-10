@@ -52,6 +52,9 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
                 
                 //InOut with message in route
                 from("direct:inout-message-name").to("avro:http:localhost:" + avroPort + "/get").to("mock:result-inout-message-name");
+                
+                //InOut with wrong message in route
+                from("direct:inout-wrong-message-name").to("avro:http:localhost:" + avroPort + "/wrongMessage").to("mock:result-inout-message-name");
             }
         };
     }

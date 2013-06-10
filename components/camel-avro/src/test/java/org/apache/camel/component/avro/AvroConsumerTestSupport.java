@@ -18,8 +18,11 @@
 package org.apache.camel.component.avro;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Assert;
+
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Requestor;
 import org.apache.avro.ipc.Transceiver;
@@ -32,12 +35,19 @@ import org.apache.camel.avro.impl.KeyValueProtocolImpl;
 import org.junit.Test;
 
 public abstract class AvroConsumerTestSupport extends AvroTestSupport {
+	
+	protected int avroPort = setupFreePort("avroport");
+	protected int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
+	protected int avroPortForWrongMessages = setupFreePort("avroPortForWrongMessages");
 
     Transceiver transceiver;
     Requestor requestor;
     
     Transceiver transceiverMessageInRoute;
     Requestor requestorMessageInRoute;
+    
+    Transceiver transceiverForWrongMessages;
+    Requestor requestorForWrongMessages;
     
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
 
@@ -67,6 +77,24 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Value value = Value.newBuilder().setValue("test value").build();
         Object[] request = {key, value};
         requestorMessageInRoute.request("put", request);
+    }
+
+    @Test(expected=AvroRuntimeException.class)
+    public void testInOnlyWrongMessageName() throws Exception {
+        initializeTranceiver();
+        Key key = Key.newBuilder().setKey("1").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        Object[] request = {key, value};
+        requestorMessageInRoute.request("throwException", request);
+    }
+    
+    @Test(expected=AvroRuntimeException.class)
+    public void testInOnlyToNotExistingRoute() throws Exception {
+        initializeTranceiver();
+        Key key = Key.newBuilder().setKey("1").build();
+        Value value = Value.newBuilder().setValue("test value").build();
+        Object[] request = {key, value};
+        requestorForWrongMessages.request("get", request);
     }
 
     @Test

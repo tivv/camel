@@ -34,6 +34,7 @@ public class AvroConfiguration implements Cloneable {
     private String protocolClassName;
     private String transport;
     private String messageName;
+    private String uriAuthority;
 
 	public AvroConfiguration copy() {
         try {
@@ -59,6 +60,8 @@ public class AvroConfiguration implements Cloneable {
         	if(!path.contains(AVRO_MESSAGE_NAME_SEPARATOR)) setMessageName(path);
         	else throw new IllegalArgumentException("Unrecognized Avro message name: " + path + " for uri: " + uri);
         }
+        
+        setUriAuthority(uri.getAuthority());
     }
 
     public String getHost() {
@@ -115,5 +118,13 @@ public class AvroConfiguration implements Cloneable {
 
 	public void setMessageName(String messageName) {
 		this.messageName = messageName;
+	}
+
+	public String getUriAuthority() {
+		return uriAuthority;
+	}
+
+	public void setUriAuthority(String uriAuthority) {
+		this.uriAuthority = uriAuthority;
 	}
 }
