@@ -29,7 +29,6 @@ public class TokenXMLPairNamespaceSplitTest extends ContextTestSupport {
     @Override
     protected void setUp() throws Exception {
         deleteDirectory("target/pair");
-        deleteDirectory("target/pair2");
         super.setUp();
     }
 
@@ -42,19 +41,6 @@ public class TokenXMLPairNamespaceSplitTest extends ContextTestSupport {
 
         String body = createBody();
         template.sendBodyAndHeader("file:target/pair", body, Exchange.FILE_NAME, "orders.xml");
-
-        assertMockEndpointsSatisfied();
-    }
-
-    public void testTokenXMLPair2() throws Exception {
-        MockEndpoint mock = getMockEndpoint("mock:split");
-        mock.expectedMessageCount(3);
-        mock.message(0).body().isEqualTo("<order id=\"1\" xmlns=\"http:acme.com\">Camel in Action</order>");
-        mock.message(1).body().isEqualTo("<order id=\"2\" xmlns=\"http:acme.com\">ActiveMQ in Action</order>");
-        mock.message(2).body().isEqualTo("<order id=\"3\" xmlns=\"http:acme.com\">DSL in Action</order>");
-
-        String body = createBody();
-        template.sendBodyAndHeader("file:target/pair2", body, Exchange.FILE_NAME, "orders.xml");
 
         assertMockEndpointsSatisfied();
     }
@@ -80,11 +66,6 @@ public class TokenXMLPairNamespaceSplitTest extends ContextTestSupport {
                     .split().tokenizeXML("order", "orders")
                         .to("mock:split");
                 // END SNIPPET: e1
-
-                from("file:target/pair2")
-                    // split the order child tags, and inherit namespaces from the orders root tag
-                    .split(body().tokenizeXML("order", "orders"))
-                        .to("mock:split");
             }
         };
     }
