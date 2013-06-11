@@ -35,6 +35,7 @@ public class AvroConfiguration implements Cloneable {
     private String transport;
     private String messageName;
     private String uriAuthority;
+    private boolean isReflectionProtocol;
 
 	public AvroConfiguration copy() {
         try {
@@ -126,5 +127,13 @@ public class AvroConfiguration implements Cloneable {
 
 	public void setUriAuthority(String uriAuthority) {
 		this.uriAuthority = uriAuthority;
+	}
+	
+	public boolean isReflectionProtocol() {
+		return isReflectionProtocol;
+	}
+
+	public void setReflectionProtocol(boolean isReflectionProtocol) {
+		this.isReflectionProtocol = isReflectionProtocol;
 	}
 }

@@ -52,6 +52,11 @@
             <from uri="avro:netty:localhost:{{avroPortForWrongMessages}}/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
             <process ref="putProcessor"/>
         </route>
+        
+        <route>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <process ref="reflectionProcessor"/>
+        </route>
 
     </camelContext>
 
@@ -64,5 +69,7 @@
     <bean id="putProcessor" class="org.apache.camel.component.avro.processors.PutProcessor">
         <constructor-arg ref="keyValue"/>
     </bean>
+    
+    <bean id="reflectionProcessor" class="org.apache.camel.component.avro.processors.ReflectionProcessor"/>
 
 </beans>

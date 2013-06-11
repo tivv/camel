@@ -18,17 +18,14 @@
 package org.apache.camel.component.avro;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 
 import junit.framework.Assert;
 
 import org.apache.avro.AvroRuntimeException;
-import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Requestor;
 import org.apache.avro.ipc.Transceiver;
 import org.apache.camel.CamelContext;
 import org.apache.camel.avro.generated.Key;
-import org.apache.camel.avro.generated.KeyValueProtocol;
 import org.apache.camel.avro.generated.Value;
 import org.apache.camel.avro.impl.KeyValueProtocolImpl;
 
@@ -39,6 +36,7 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
 	protected int avroPort = setupFreePort("avroport");
 	protected int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
 	protected int avroPortForWrongMessages = setupFreePort("avroPortForWrongMessages");
+	protected int avroPortReflectionTest = setupFreePort("avroPortReflectionTest");
 
     Transceiver transceiver;
     Requestor requestor;
@@ -49,7 +47,12 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
     Transceiver transceiverForWrongMessages;
     Requestor requestorForWrongMessages;
     
+    Transceiver reflectTransceiver;
+    Requestor reflectRequestor;
+    
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
+    
+    public static final String REFLECTION_TEST_NAME = "Chucky";
 
     protected abstract void initializeTranceiver() throws IOException;
 
@@ -77,6 +80,13 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Value value = Value.newBuilder().setValue("test value").build();
         Object[] request = {key, value};
         requestorMessageInRoute.request("put", request);
+    }
+    
+    @Test
+    public void testInOnlyReflectRequestor() throws Exception {
+        initializeTranceiver();
+        Object[] request = {REFLECTION_TEST_NAME};
+        reflectRequestor.request("setName", request);
     }
 
     @Test(expected=AvroRuntimeException.class)
@@ -124,9 +134,7 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        Protocol protocol = KeyValueProtocol.PROTOCOL;
         AvroConfiguration configuration = new AvroConfiguration();
-        configuration.setProtocol(protocol);
         AvroComponent component = new AvroComponent(context);
         component.setConfiguration(configuration);
         context.addComponent("avro", component);

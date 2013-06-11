@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.avro.Protocol;
+import org.apache.avro.reflect.ReflectData;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
@@ -83,11 +84,17 @@ public class AvroComponent extends DefaultComponent {
         if (config.getProtocol() == null && config.getProtocolClassName() != null) {
             Class<?> protocolClass = getCamelContext().getClassResolver().resolveClass(config.getProtocolClassName());
             if (protocolClass != null) {
-                Field f = protocolClass.getField("PROTOCOL");
-                if (f != null) {
-                    Protocol protocol = (Protocol) f.get(null);
-                    config.setProtocol(protocol);
-                }
+            	try {
+            		Field f = protocolClass.getField("PROTOCOL");
+            		if (f != null) {
+                        Protocol protocol = (Protocol) f.get(null);
+                        config.setProtocol(protocol);
+                    }
+            	} catch(NoSuchFieldException e) {
+            		ReflectData reflectData = ReflectData.get();
+                	config.setProtocol(reflectData.getProtocol(protocolClass));
+                	config.setReflectionProtocol(true);
+            	}
             }
         }
 
@@ -108,7 +115,11 @@ public class AvroComponent extends DefaultComponent {
     public void register(String uri, String messageName, AvroConsumer consumer) throws Exception {
     	AvroResponder responder = responderRegistry.get(uri);
     	if(responder == null) {
-    		responder = new AvroResponder(consumer);
+    		if(consumer.getEndpoint().getConfiguration().isReflectionProtocol())
+    			responder = new AvroReflectResponder(consumer);
+    		else
+    			responder = new AvroSpecificResponder(consumer);
+    		
     		responderRegistry.put(uri, responder);
     	}
     	responder.register(messageName, consumer);
