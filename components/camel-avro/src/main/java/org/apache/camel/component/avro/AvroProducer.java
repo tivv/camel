@@ -19,7 +19,6 @@ package org.apache.camel.component.avro;
 import org.apache.avro.ipc.Callback;
 import org.apache.avro.ipc.Requestor;
 import org.apache.avro.ipc.Transceiver;
-
 import org.apache.camel.AsyncCallback;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
@@ -45,7 +44,10 @@ public abstract class AvroProducer extends DefaultAsyncProducer implements Servi
         if (transceiver == null) {
             try {
                 transceiver = createTransceiver();
-                requestor = new AvroRequestor(getEndpoint().getProtocol(), transceiver);
+                if(getEndpoint().getConfiguration().isReflectionProtocol())
+                	requestor = new AvroReflectRequestor(getEndpoint().getProtocol(), transceiver);
+                else
+                	requestor = new AvroSpecificRequestor(getEndpoint().getProtocol(), transceiver);
             } catch (Exception e) {
                 exchange.setException(e);
                 callback.done(true);

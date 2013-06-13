@@ -21,23 +21,25 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 
-import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Server;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.avro.generated.Key;
-import org.apache.camel.avro.generated.KeyValueProtocol;
 import org.apache.camel.avro.generated.Value;
 import org.apache.camel.avro.impl.KeyValueProtocolImpl;
+import org.apache.camel.avro.test.TestReflectionImpl;
 import org.apache.camel.component.mock.MockEndpoint;
-
 import org.junit.Test;
 
 public abstract class AvroProducerTestSupport extends AvroTestSupport {
 
+	protected int avroPort = setupFreePort("avroort");
+	protected int avroPortReflection = setupFreePort("avroPortReflection");
+	
     Server server;
+    Server serverReflection;
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
+    TestReflectionImpl testReflectionImpl = new TestReflectionImpl();
 
     protected abstract void initializeServer() throws IOException;
 
@@ -52,6 +54,10 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         super.tearDown();
         if (server != null) {
             server.close();
+        }
+        
+        if (serverReflection != null) {
+            serverReflection.close();
         }
     }
 
@@ -71,6 +77,14 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         Object[] request = {key, value};
         template.sendBody("direct:in-message-name", request);
         Assert.assertEquals(value, keyValue.getStore().get(key));
+    }
+    
+    @Test
+    public void testInOnlyReflection() throws InterruptedException {
+        String name = "Chuck";
+        Object[] request = {name};
+        template.sendBody("direct:in-reflection", request);
+        Assert.assertEquals(name, testReflectionImpl.getName());
     }
     
     @Test(expected=CamelExecutionException.class)
@@ -126,9 +140,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
     @Override
     protected CamelContext createCamelContext() throws Exception {
         CamelContext context = super.createCamelContext();
-        Protocol protocol = KeyValueProtocol.PROTOCOL;
         AvroConfiguration configuration = new AvroConfiguration();
-        configuration.setProtocol(protocol);
         AvroComponent component = new AvroComponent(context);
         component.setConfiguration(configuration);
         context.addComponent("avro", component);

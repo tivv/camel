@@ -20,20 +20,24 @@ package org.apache.camel.component.avro;
 import java.io.IOException;
 
 import org.apache.avro.ipc.HttpServer;
+import org.apache.avro.ipc.reflect.ReflectResponder;
 import org.apache.avro.ipc.specific.SpecificResponder;
-
 import org.apache.camel.avro.generated.KeyValueProtocol;
+import org.apache.camel.avro.test.TestReflection;
 import org.apache.camel.builder.RouteBuilder;
 
 public class AvroHttpProducerTest extends AvroProducerTestSupport {
-
-    int avroPort = setupFreePort("avroport");
 
     @Override
     protected void initializeServer() throws IOException {
         if (server == null) {
             server = new HttpServer(new SpecificResponder(KeyValueProtocol.PROTOCOL, keyValue), avroPort);
             server.start();
+        }
+        
+        if (serverReflection == null) {
+        	serverReflection = new HttpServer(new ReflectResponder(TestReflection.class, testReflectionImpl), avroPortReflection);
+        	serverReflection.start();
         }
     }
 
@@ -42,19 +46,22 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
             @Override
             public void configure() throws Exception {
                 //In Only
-                from("direct:in").to("avro:http:localhost:" + avroPort);
+                from("direct:in").to("avro:http:localhost:" + avroPort + "?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol");
                 
                 //In Only with message in route
-                from("direct:in-message-name").to("avro:http:localhost:" + avroPort + "/put");
+                from("direct:in-message-name").to("avro:http:localhost:" + avroPort + "/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol");
+                
+                //In Only with existing interface
+                from("direct:in-reflection").to("avro:http:localhost:" + avroPortReflection + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection");
 
                 //InOut
-                from("direct:inout").to("avro:http:localhost:" + avroPort).to("mock:result-inout");
+                from("direct:inout").to("avro:http:localhost:" + avroPort + "?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol").to("mock:result-inout");
                 
                 //InOut with message in route
-                from("direct:inout-message-name").to("avro:http:localhost:" + avroPort + "/get").to("mock:result-inout-message-name");
+                from("direct:inout-message-name").to("avro:http:localhost:" + avroPort + "/get?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol").to("mock:result-inout-message-name");
                 
                 //InOut with wrong message in route
-                from("direct:inout-wrong-message-name").to("avro:http:localhost:" + avroPort + "/wrongMessage").to("mock:result-inout-message-name");
+                from("direct:inout-wrong-message-name").to("avro:http:localhost:" + avroPort + "/wrongMessage?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol").to("mock:result-inout-message-name");
             }
         };
     }

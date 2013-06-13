@@ -8,11 +8,6 @@ public class AvroComponentException extends Exception {
 		super();
 	}
 
-	public AvroComponentException(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
 	public AvroComponentException(String message, Throwable cause) {
 		super(message, cause);
 	}

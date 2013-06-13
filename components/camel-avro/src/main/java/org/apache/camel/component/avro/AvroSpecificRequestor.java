@@ -22,9 +22,9 @@ import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Transceiver;
 import org.apache.avro.ipc.specific.SpecificRequestor;
 
-public class AvroRequestor extends SpecificRequestor {
+public class AvroSpecificRequestor extends SpecificRequestor {
 
-    public AvroRequestor(Protocol protocol, Transceiver transceiver) throws IOException {
+    public AvroSpecificRequestor(Protocol protocol, Transceiver transceiver) throws IOException {
         super(protocol, transceiver);
     }
 }

@@ -33,6 +33,11 @@
             <from uri="direct:in-message-name"/>
             <to uri="avro:netty:localhost:{{avroport}}/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
         </route>
+        
+        <route>
+            <from uri="direct:in-reflection"/>
+            <to uri="avro:netty:localhost:{{avroPortReflection}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+        </route>
 
         <route>
             <from uri="direct:inout"/>
