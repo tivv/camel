@@ -24,5 +24,11 @@ public class TestReflectionImpl implements TestReflection {
 	public void setAge(int age) {
 		this.age = age;
 	}
+	
+	@Override
+	public int increaseAge(int age) {
+		this.age = ++age;
+		return this.age;
+	}
 
 }

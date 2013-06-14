@@ -39,7 +39,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
     Server server;
     Server serverReflection;
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
-    TestReflectionImpl testReflectionImpl = new TestReflectionImpl();
+    TestReflectionImpl testReflection = new TestReflectionImpl();
 
     protected abstract void initializeServer() throws IOException;
 
@@ -84,7 +84,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         String name = "Chuck";
         Object[] request = {name};
         template.sendBody("direct:in-reflection", request);
-        Assert.assertEquals(name, testReflectionImpl.getName());
+        Assert.assertEquals(name, testReflection.getName());
     }
     
     @Test(expected=CamelExecutionException.class)
@@ -135,6 +135,19 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.expectedMessageCount(0);
         mock.expectedBodiesReceived(value);
         template.sendBody("direct:inout-wrong-message-name", key);
+        mock.assertIsSatisfied(10000);
+    }
+    
+    @Test
+    public void testInOutReflection() throws InterruptedException {
+    	int age = 100;
+        Object[] request = {age};
+
+        MockEndpoint mock = getMockEndpoint("mock:result-inout-reflection");
+        mock.expectedMessageCount(1);
+        mock.expectedBodiesReceived(++age);
+        template.sendBody("direct:inout-reflection", request);
+        mock.assertIsSatisfied(10000);
     }
 
     @Override

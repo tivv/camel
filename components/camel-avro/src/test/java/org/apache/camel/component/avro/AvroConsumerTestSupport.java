@@ -28,7 +28,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.avro.generated.Key;
 import org.apache.camel.avro.generated.Value;
 import org.apache.camel.avro.impl.KeyValueProtocolImpl;
-
+import org.apache.camel.avro.test.TestReflection;
+import org.apache.camel.avro.test.TestReflectionImpl;
 import org.junit.Test;
 
 public abstract class AvroConsumerTestSupport extends AvroTestSupport {
@@ -51,8 +52,10 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
     Requestor reflectRequestor;
     
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
+    TestReflection testReflection = new TestReflectionImpl();
     
     public static final String REFLECTION_TEST_NAME = "Chucky";
+    public static final int REFLECTION_TEST_AGE = 100;
 
     protected abstract void initializeTranceiver() throws IOException;
 
@@ -61,6 +64,18 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         super.tearDown();
         if (transceiver != null) {
             transceiver.close();
+        }
+        
+        if (transceiverMessageInRoute != null) {
+        	transceiverMessageInRoute.close();
+        }
+        
+        if (transceiverForWrongMessages != null) {
+        	transceiverForWrongMessages.close();
+        }
+        
+        if (reflectTransceiver != null) {
+        	reflectTransceiver.close();
         }
     }
 
@@ -129,6 +144,14 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Object[] request = {key};
         Object response = requestorMessageInRoute.request("get", request);
         Assert.assertEquals(value, response);
+    }
+    
+    @Test
+    public void testInOutReflectRequestor() throws Exception {
+        initializeTranceiver();
+        Object[] request = {REFLECTION_TEST_AGE};
+        Object response = reflectRequestor.request("increaseAge", request);
+        Assert.assertEquals(testReflection.getAge(), response);
     }
 
     @Override

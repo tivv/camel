@@ -1,22 +1,14 @@
 package org.apache.camel.component.avro;
 
-import static org.apache.camel.component.avro.AvroConstants.AVRO_HTTP_TRANSPORT;
-import static org.apache.camel.component.avro.AvroConstants.AVRO_NETTY_TRANSPORT;
-
-import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.avro.Protocol;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.ipc.HttpServer;
-import org.apache.avro.ipc.NettyServer;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.reflect.ReflectResponder;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.camel.Exchange;
-import org.apache.camel.util.ExchangeHelper;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
@@ -30,15 +22,7 @@ public class AvroReflectResponder extends ReflectResponder implements
 	
 	public AvroReflectResponder(AvroConsumer consumer)  throws Exception {
         super(consumer.getEndpoint().getProtocol(), null);
-        AvroConfiguration configuration = consumer.getEndpoint().getConfiguration();
-        
-        if(AVRO_HTTP_TRANSPORT.equalsIgnoreCase(configuration.getTransport()))
-        	server = new HttpServer(this, configuration.getPort());
-        
-        if(AVRO_NETTY_TRANSPORT.equalsIgnoreCase(configuration.getTransport()))
-            server = new NettyServer(this, new InetSocketAddress(configuration.getHost(), configuration.getPort()));
-
-        server.start();
+        server = AvroResponderUtil.initAndStartServer(server, this, consumer);
     }
 	
 	@Override
@@ -46,7 +30,6 @@ public class AvroReflectResponder extends ReflectResponder implements
     	if(MapUtils.isNotEmpty(getLocal().getMessages()) && !getLocal().getMessages().containsKey(message.getName()))
         	throw new AvroComponentException("No message with name: " + message.getName() + " defined in protocol.");
     	
-        Object response;
         int numParams = message.getRequest().getFields().size();
         Object[] params = new Object[numParams];
         Class<?>[] paramTypes = new Class[numParams];
@@ -63,30 +46,7 @@ public class AvroReflectResponder extends ReflectResponder implements
         
         if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
         
-        Exchange exchange = consumer.getEndpoint().createExchange(message, params);
-
-        try {
-        	consumer.getProcessor().process(exchange);
-        } catch (Throwable e) {
-        	consumer.getExceptionHandler().handleException(e);
-        }
-
-        if (ExchangeHelper.isOutCapable(exchange)) {
-            response = exchange.getOut().getBody();
-        } else {
-            response = null;
-        }
-
-        boolean failed = exchange.isFailed();
-        if (failed) {
-            if (exchange.getException() != null) {
-                response = exchange.getException();
-            } else {
-                // failed and no exception, must be a fault
-                response = exchange.getOut().getBody();
-            }
-        }
-        return response;
+        return AvroResponderUtil.processExchange(consumer, message, params);
     }
 
     /**

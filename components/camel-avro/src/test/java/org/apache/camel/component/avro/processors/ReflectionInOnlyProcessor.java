@@ -1,13 +1,12 @@
 package org.apache.camel.component.avro.processors;
 
+import static org.apache.camel.component.avro.AvroConsumerTestSupport.REFLECTION_TEST_NAME;
 import junit.framework.Assert;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
-import static org.apache.camel.component.avro.AvroConsumerTestSupport.REFLECTION_TEST_NAME; 
-
-public class ReflectionProcessor implements Processor {
+public class ReflectionInOnlyProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {

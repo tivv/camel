@@ -10,4 +10,6 @@ public interface TestReflection {
 	
 	public void setAge(int age);
 	
+	public int increaseAge(int age);
+	
 }

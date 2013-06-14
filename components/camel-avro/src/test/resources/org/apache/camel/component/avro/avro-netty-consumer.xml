@@ -55,12 +55,19 @@
         
         <route>
             <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
-            <process ref="reflectionProcessor"/>
+            <process ref="reflectionInOnlyProcessor"/>
+        </route>
+        
+        <route>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <process ref="reflectionInOutProcessor"/>
         </route>
 
     </camelContext>
 
     <bean id="keyValue" class="org.apache.camel.avro.impl.KeyValueProtocolImpl"/>
+    
+    <bean id="testReflection" class="org.apache.camel.avro.test.TestReflectionImpl"/>
 
     <bean id="getProcessor" class="org.apache.camel.component.avro.processors.GetProcessor">
         <constructor-arg ref="keyValue"/>
@@ -70,6 +77,10 @@
         <constructor-arg ref="keyValue"/>
     </bean>
     
-    <bean id="reflectionProcessor" class="org.apache.camel.component.avro.processors.ReflectionProcessor"/>
+    <bean id="reflectionInOnlyProcessor" class="org.apache.camel.component.avro.processors.ReflectionInOnlyProcessor"/>
+    
+    <bean id="reflectionInOutProcessor" class="org.apache.camel.component.avro.processors.ReflectionInOutProcessor">
+    	<constructor-arg ref="testReflection"/>
+    </bean>
 
 </beans>

@@ -50,6 +50,12 @@
             <to uri="avro:http:localhost:{{avroport}}/get?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
             <to uri="mock:result-inout-message-name"/>
         </route>
+        
+        <route>
+            <from uri="direct:inout-reflection"/>
+            <to uri="avro:http:localhost:{{avroPortReflection}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <to uri="mock:result-inout-reflection"/>
+        </route>
 
     </camelContext>
 
