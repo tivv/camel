@@ -23,7 +23,6 @@ import junit.framework.Assert;
 
 import org.apache.avro.ipc.Server;
 import org.apache.camel.CamelContext;
-import org.apache.camel.CamelExecutionException;
 import org.apache.camel.avro.generated.Key;
 import org.apache.camel.avro.generated.Value;
 import org.apache.camel.avro.impl.KeyValueProtocolImpl;
@@ -72,11 +71,14 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
     
     @Test
     public void testInOnlyWithMessageNameInRoute() throws InterruptedException {
+    	MockEndpoint mock = getMockEndpoint("mock:result-in-message-name");
+    	mock.expectedMessageCount(1);
         Key key = Key.newBuilder().setKey("1").build();
         Value value = Value.newBuilder().setValue("test value").build();
         Object[] request = {key, value};
         template.sendBody("direct:in-message-name", request);
         Assert.assertEquals(value, keyValue.getStore().get(key));
+        mock.assertIsSatisfied(10000);
     }
     
     @Test
@@ -87,13 +89,18 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         Assert.assertEquals(name, testReflection.getName());
     }
     
-    @Test(expected=CamelExecutionException.class)
+    @Test
     public void testInOnlyWithWrongMessageNameInMessage() throws InterruptedException {
+    	MockEndpoint mockInMessageEnd = getMockEndpoint("mock:result-in-message-name");
+    	mockInMessageEnd.expectedMessageCount(0);
+    	MockEndpoint mockErrorChannel = getMockEndpoint("mock:in-message-name-error");
+    	mockErrorChannel.expectedMessageCount(1);
         Key key = Key.newBuilder().setKey("1").build();
         Value value = Value.newBuilder().setValue("test value").build();
         Object[] request = {key, value};
         template.sendBodyAndHeader("direct:in-message-name", request, AvroConstants.AVRO_MESSAGE_NAME, "/get");
-        Assert.assertEquals(value, keyValue.getStore().get(key));
+        mockErrorChannel.assertIsSatisfied(10000);
+        mockInMessageEnd.assertIsSatisfied(10000);
     }
 
     @Test
@@ -124,17 +131,20 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.assertIsSatisfied(10000);
     }
     
-    @Test(expected=CamelExecutionException.class)
+    @Test
     public void testInOutWrongMessageNameInRoute() throws InterruptedException {
         keyValue.getStore().clear();
         Key key = Key.newBuilder().setKey("2").build();
         Value value = Value.newBuilder().setValue("test value").build();
         keyValue.getStore().put(key, value);
 
+        MockEndpoint mockErrorChannel = getMockEndpoint("mock:inout-message-name-error");
+        mockErrorChannel.expectedMessageCount(1);
+        mockErrorChannel.expectedBodiesReceived(key);
         MockEndpoint mock = getMockEndpoint("mock:result-inout-message-name");
         mock.expectedMessageCount(0);
-        mock.expectedBodiesReceived(value);
         template.sendBody("direct:inout-wrong-message-name", key);
+        mockErrorChannel.assertIsSatisfied(10000);
         mock.assertIsSatisfied(10000);
     }
     

@@ -51,7 +51,9 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
                 
                 //In Only with message in route
                 from("direct:in-message-name")
-                .to("avro:http:localhost:" + avroPort + "/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol");
+                .errorHandler(deadLetterChannel("mock:in-message-name-error"))
+                .to("avro:http:localhost:" + avroPort + "/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol")
+                .to("mock:result-in-message-name");
                 
                 //In Only with existing interface
                 from("direct:in-reflection")
@@ -69,6 +71,7 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
                 
                 //InOut with wrong message in route
                 from("direct:inout-wrong-message-name")
+                .errorHandler(deadLetterChannel("mock:inout-message-name-error"))
                 .to("avro:http:localhost:" + avroPort + "/wrongMessage?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol")
                 .to("mock:result-inout-message-name");
                 

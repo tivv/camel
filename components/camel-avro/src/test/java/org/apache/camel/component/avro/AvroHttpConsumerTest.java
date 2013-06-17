@@ -28,8 +28,8 @@ import org.apache.camel.avro.test.TestReflection;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.avro.processors.GetProcessor;
 import org.apache.camel.component.avro.processors.PutProcessor;
-import org.apache.camel.component.avro.processors.ReflectionInOutProcessor;
 import org.apache.camel.component.avro.processors.ReflectionInOnlyProcessor;
+import org.apache.camel.component.avro.processors.ReflectionInOutProcessor;
 
 public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
 
@@ -51,7 +51,9 @@ public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
     protected RouteBuilder createRouteBuilder() throws Exception {
         return new RouteBuilder() {
             @Override
-            public void configure() throws Exception {           	
+            public void configure() throws Exception {
+            	errorHandler(deadLetterChannel("mock:exception-handler"));
+            	
                 //In Only
                 from("avro:http:localhost:" + avroPort + "?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol").choice()
                         .when().el("${in.headers." + AvroConstants.AVRO_MESSAGE_NAME + " == 'put'}").process(new PutProcessor(keyValue))
