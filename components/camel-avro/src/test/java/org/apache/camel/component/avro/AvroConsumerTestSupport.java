@@ -102,6 +102,7 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         initializeTranceiver();
         Object[] request = {REFLECTION_TEST_NAME};
         reflectRequestor.request("setName", request);
+        Assert.assertEquals(REFLECTION_TEST_NAME, testReflection.getName());
     }
 
     @Test(expected=AvroRuntimeException.class)

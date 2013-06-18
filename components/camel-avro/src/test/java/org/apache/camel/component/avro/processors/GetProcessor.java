@@ -16,6 +16,8 @@
  */
 package org.apache.camel.component.avro.processors;
 
+import java.util.List;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.avro.generated.Key;
@@ -33,10 +35,14 @@ public class GetProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         Object body = exchange.getIn().getBody();
-        if (body instanceof Object[]) {
-            Object[] args = (Object[]) body;
-            if (args.length == 1 && args[0] instanceof Key) {
-                Value v = keyValue.get((Key) args[0]);
+        if (body instanceof Key) {
+        	Value v = keyValue.get((Key) body);
+            exchange.getOut().setBody(v);
+        }
+        if(body instanceof List<?>) {
+        	List<Object> args = (List<Object>) body;
+            if (args.size() == 1 && args.get(0) instanceof Key) {
+                Value v = keyValue.get((Key) args.get(0));
                 exchange.getOut().setBody(v);
             }
         }

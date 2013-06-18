@@ -69,7 +69,7 @@ public class AvroHttpConsumerTest extends AvroConsumerTestSupport {
                 .process(new PutProcessor(keyValue));
                 
                 from("avro:http:localhost:" + avroPortReflectionTest + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection")
-                .process(new ReflectionInOnlyProcessor());
+                .process(new ReflectionInOnlyProcessor(testReflection));
                 
                 from("avro:http:localhost:" + avroPortReflectionTest + "/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection")
                 .process(new ReflectionInOutProcessor(testReflection));

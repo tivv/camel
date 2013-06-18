@@ -4,8 +4,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.avro.Protocol;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.reflect.ReflectResponder;
 import org.apache.avro.reflect.ReflectData;
@@ -29,22 +27,14 @@ public class AvroReflectResponder extends ReflectResponder implements
     public Object respond(Protocol.Message message, Object request) throws AvroComponentException {
     	if(MapUtils.isNotEmpty(getLocal().getMessages()) && !getLocal().getMessages().containsKey(message.getName()))
         	throw new AvroComponentException("No message with name: " + message.getName() + " defined in protocol.");
-    	
-        int numParams = message.getRequest().getFields().size();
-        Object[] params = new Object[numParams];
-        Class<?>[] paramTypes = new Class[numParams];
-        int i = 0;
-        for (Schema.Field param : message.getRequest().getFields()) {
-            params[i] = ((GenericRecord) request).get(param.name());
-            paramTypes[i] = ReflectData.get().getClass(param.schema());
-            i++;
-        }
         
         AvroConsumer consumer = this.defaultConsumer;
         if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.get(message.getName()) != null)
         	consumer = this.consumerRegistry.get(message.getName());
         
         if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
+        
+        Object params = AvroResponderUtil.<ReflectData>extractParams(message, request);
         
         return AvroResponderUtil.processExchange(consumer, message, params);
     }

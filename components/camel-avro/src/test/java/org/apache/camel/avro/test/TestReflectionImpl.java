@@ -7,7 +7,7 @@ public class TestReflectionImpl implements TestReflection {
 	
 	@Override
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	@Override
@@ -17,7 +17,7 @@ public class TestReflectionImpl implements TestReflection {
 
 	@Override
 	public int getAge() {
-		return age;
+		return this.age;
 	}
 
 	@Override

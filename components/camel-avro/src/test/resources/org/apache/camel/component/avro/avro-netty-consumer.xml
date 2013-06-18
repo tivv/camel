@@ -77,7 +77,9 @@
         <constructor-arg ref="keyValue"/>
     </bean>
     
-    <bean id="reflectionInOnlyProcessor" class="org.apache.camel.component.avro.processors.ReflectionInOnlyProcessor"/>
+    <bean id="reflectionInOnlyProcessor" class="org.apache.camel.component.avro.processors.ReflectionInOnlyProcessor">
+    	<constructor-arg ref="testReflection"/>
+    </bean>
     
     <bean id="reflectionInOutProcessor" class="org.apache.camel.component.avro.processors.ReflectionInOutProcessor">
     	<constructor-arg ref="testReflection"/>
