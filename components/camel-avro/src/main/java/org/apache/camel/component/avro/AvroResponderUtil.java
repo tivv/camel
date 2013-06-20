@@ -1,3 +1,19 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.camel.component.avro;
 
 import static org.apache.camel.component.avro.AvroConstants.AVRO_HTTP_TRANSPORT;
@@ -87,15 +103,17 @@ public class AvroResponderUtil {
 	 *  
 	 * @param	message Avro message
 	 * @param	request Avro request
+	 * @param	singleParameter Indicates that called method has single parameter
+	 * @param	dataResolver Extracts type of parameters in call 
 	 * @return	Parameters of RPC method invocation
 	 */
-	static <T extends SpecificData> Object extractParams(Protocol.Message message, Object request) {
+	static <T extends SpecificData> Object extractParams(Protocol.Message message, Object request, Boolean singleParameter, T dataResolver) {
 		int numParams = message.getRequest().getFields().size();
         
         if(numParams == 1) {
         	Object param;
         	Field field = message.getRequest().getFields().get(0);
-        	Class<T> paramType = T.get().getClass(field.schema());
+        	Class<?> paramType = dataResolver.getClass(field.schema());
         	if(!paramType.isPrimitive() && ((GenericRecord) request).get(field.name()) != null)
         		param = paramType.cast(((GenericRecord) request).get(field.name()));
         	else

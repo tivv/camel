@@ -54,12 +54,27 @@
         </route>
         
         <route>
-            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>
             <process ref="reflectionInOnlyProcessor"/>
         </route>
         
         <route>
-            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setAge?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <process ref="reflectionInOnlyProcessor"/>
+        </route>
+        
+        <route>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/setTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>
+            <process ref="reflectionInOnlyProcessor"/>
+        </route>
+        
+        <route>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>
+            <process ref="reflectionInOutProcessor"/>
+        </route>
+        
+        <route>
+            <from uri="avro:netty:localhost:{{avroPortReflectionTest}}/getTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
             <process ref="reflectionInOutProcessor"/>
         </route>
 

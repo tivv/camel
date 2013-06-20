@@ -1,3 +1,19 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.camel.component.avro;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,7 +23,6 @@ import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.reflect.ReflectResponder;
 import org.apache.avro.reflect.ReflectData;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 
@@ -25,16 +40,16 @@ public class AvroReflectResponder extends ReflectResponder implements
 	
 	@Override
     public Object respond(Protocol.Message message, Object request) throws AvroComponentException {
-    	if(MapUtils.isNotEmpty(getLocal().getMessages()) && !getLocal().getMessages().containsKey(message.getName()))
-        	throw new AvroComponentException("No message with name: " + message.getName() + " defined in protocol.");
+    	if((defaultConsumer==null) && (!getLocal().getMessages().containsKey(message.getName())))
+        	throw new AvroComponentException("No message with name: " + message.getName() + " mapped.");
         
         AvroConsumer consumer = this.defaultConsumer;
-        if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.get(message.getName()) != null)
+        if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.containsKey(message.getName()))
         	consumer = this.consumerRegistry.get(message.getName());
         
         if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
         
-        Object params = AvroResponderUtil.<ReflectData>extractParams(message, request);
+        Object params = AvroResponderUtil.<ReflectData>extractParams(message, request, consumer.getEndpoint().getConfiguration().getSingleParameter(), ReflectData.get());
         
         return AvroResponderUtil.processExchange(consumer, message, params);
     }
@@ -50,11 +65,11 @@ public class AvroReflectResponder extends ReflectResponder implements
     public void register(String messageName, AvroConsumer consumer) throws AvroComponentException {       
     	if (messageName == null) {
     		if(this.defaultConsumer != null)
-    			throw new AvroComponentException("Consumer default consumer already registrered for uri: " + consumer.getEndpoint().getEndpointUri());
+    			throw new AvroComponentException("Default consumer already registered for uri: " + consumer.getEndpoint().getEndpointUri());
     		this.defaultConsumer = consumer;
     	} else {
     		if (consumerRegistry.putIfAbsent(messageName, consumer) != null) {
-    			throw new AvroComponentException("Consumer already registrered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
+    			throw new AvroComponentException("Consumer already registered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
     		}
     	}
     }

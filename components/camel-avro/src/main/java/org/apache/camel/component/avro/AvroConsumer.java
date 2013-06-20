@@ -33,6 +33,7 @@ public class AvroConsumer extends DefaultConsumer {
     
     @Override
     protected void doStart() throws Exception {
+    	super.doStart();
     	((AvroComponent) getEndpoint().getComponent()).register(getEndpoint().getConfiguration().getUriAuthority(), getEndpoint().getConfiguration().getMessageName(), this);
     }
 

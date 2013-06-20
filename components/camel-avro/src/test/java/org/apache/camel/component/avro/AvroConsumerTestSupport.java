@@ -28,6 +28,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.avro.generated.Key;
 import org.apache.camel.avro.generated.Value;
 import org.apache.camel.avro.impl.KeyValueProtocolImpl;
+import org.apache.camel.avro.test.TestPojo;
 import org.apache.camel.avro.test.TestReflection;
 import org.apache.camel.avro.test.TestReflectionImpl;
 import org.junit.Test;
@@ -122,6 +123,24 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Object[] request = {key, value};
         requestorForWrongMessages.request("get", request);
     }
+    
+    @Test
+    public void testInOnlyReflectSingleParameterNotSet() throws Exception {
+        initializeTranceiver();
+        Object[] request = {100};
+        reflectRequestor.request("setAge", request);
+        Assert.assertEquals(0, testReflection.getAge());
+    }
+    
+    @Test
+    public void testInOnlyReflectionPojoTest() throws Exception {
+        initializeTranceiver();
+        TestPojo testPojo = new TestPojo();
+        testPojo.setPojoName("pojo1");
+        Object[] request = {testPojo};
+        reflectRequestor.request("setTestPojo", request);
+        Assert.assertEquals(testPojo.getPojoName(), testReflection.getTestPojo().getPojoName());
+    }
 
     @Test
     public void testInOut() throws Exception {
@@ -153,6 +172,18 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         Object[] request = {REFLECTION_TEST_AGE};
         Object response = reflectRequestor.request("increaseAge", request);
         Assert.assertEquals(testReflection.getAge(), response);
+    }
+    
+    @Test
+    public void testInOutReflectionPojoTest() throws Exception {
+        initializeTranceiver();
+        TestPojo testPojo = new TestPojo();
+        testPojo.setPojoName("pojo2");
+        Object[] request = {testPojo};
+        reflectRequestor.request("setTestPojo", request);
+        request = new Object[0];
+        Object response = reflectRequestor.request("getTestPojo", request);
+        Assert.assertEquals(testPojo.getPojoName(), ((TestPojo) response).getPojoName());
     }
 
     @Override

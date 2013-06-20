@@ -23,7 +23,6 @@ import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
 import org.apache.avro.specific.SpecificData;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 
@@ -40,16 +39,16 @@ public class AvroSpecificResponder extends SpecificResponder implements AvroResp
 
     @Override
     public Object respond(Protocol.Message message, Object request) throws AvroComponentException {
-    	if(MapUtils.isNotEmpty(getLocal().getMessages()) && !getLocal().getMessages().containsKey(message.getName()))
-        	throw new AvroComponentException("No message with name: " + message.getName() + " defined in protocol.");
+    	if((defaultConsumer==null) && (!getLocal().getMessages().containsKey(message.getName())))
+        	throw new AvroComponentException("No message with name: " + message.getName() + " mapped.");
     	        
         AvroConsumer consumer = this.defaultConsumer;
-        if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.get(message.getName()) != null)
+        if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.containsKey(message.getName()))
         	consumer = this.consumerRegistry.get(message.getName());
         
         if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
         
-        Object params = AvroResponderUtil.<SpecificData>extractParams(message, request);
+        Object params = AvroResponderUtil.<SpecificData>extractParams(message, request, consumer.getEndpoint().getConfiguration().getSingleParameter(), SpecificData.get());
         
         return AvroResponderUtil.processExchange(consumer, message, params);
     }
@@ -65,11 +64,11 @@ public class AvroSpecificResponder extends SpecificResponder implements AvroResp
     public void register(String messageName, AvroConsumer consumer) throws AvroComponentException {       
     	if (messageName == null) {
     		if(this.defaultConsumer != null)
-    			throw new AvroComponentException("Consumer default consumer already registrered for uri: " + consumer.getEndpoint().getEndpointUri());
+    			throw new AvroComponentException("Default consumer already registered for uri: " + consumer.getEndpoint().getEndpointUri());
     		this.defaultConsumer = consumer;
     	} else {
     		if (consumerRegistry.putIfAbsent(messageName, consumer) != null) {
-    			throw new AvroComponentException("Consumer already registrered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
+    			throw new AvroComponentException("Consumer already registered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
     		}
     	}
     }

@@ -16,20 +16,15 @@
  */
 package org.apache.camel.avro.test;
 
-public interface TestReflection {
-	
-	public String getName();
-	
-	public void setName(String name);
+public class TestPojo {
 
-	public int getAge();
-	
-	public void setAge(int age);
-	
-	public int increaseAge(int age);
-	
-	public void setTestPojo(TestPojo testPojo);
-	
-	public TestPojo getTestPojo();
-	
+	private String pojoName;
+
+	public String getPojoName() {
+		return pojoName;
+	}
+
+	public void setPojoName(String pojoName) {
+		this.pojoName = pojoName;
+	} 
 }
