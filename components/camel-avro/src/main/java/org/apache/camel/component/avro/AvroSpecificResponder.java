@@ -48,7 +48,7 @@ public class AvroSpecificResponder extends SpecificResponder implements AvroResp
         
         if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
         
-        Object params = AvroResponderUtil.<SpecificData>extractParams(message, request, consumer.getEndpoint().getConfiguration().getSingleParameter(), SpecificData.get());
+        Object params = AvroResponderUtil.extractParams(message, request, consumer.getEndpoint().getConfiguration().isSingleParameter(), SpecificData.get());
         
         return AvroResponderUtil.processExchange(consumer, message, params);
     }

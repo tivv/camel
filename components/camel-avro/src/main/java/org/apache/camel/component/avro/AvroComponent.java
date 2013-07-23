@@ -18,6 +18,7 @@ package org.apache.camel.component.avro;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -100,6 +101,25 @@ public class AvroComponent extends DefaultComponent {
 
         if (config.getProtocol() == null) {
             throw new IllegalArgumentException("Avro configuration does not contain protocol");
+        }
+
+        if (config.getMessageName() != null && !config.getProtocol().getMessages().containsKey(config.getMessageName())) {
+            throw new IllegalArgumentException("Message " + config.getMessageName() + " is not defined in protocol");
+        }
+
+        if (config.isSingleParameter()) {
+            Map<String, Protocol.Message> messageMap = config.getProtocol().getMessages();
+            Iterable<Protocol.Message> messagesToCheck =  config.getMessageName() == null ?
+                    messageMap.values() :
+                    Collections.singleton(messageMap.get(config.getMessageName()));
+            for (Protocol.Message message: messagesToCheck) {
+                if (message.getRequest().getFields().size() != 1) {
+                    throw new IllegalArgumentException("Single parameter option can't be used with message "
+                            + message.getName() + " because it has " + message.getRequest().getFields().size() +
+                            " parameters defined"
+                    );
+                }
+            }
         }
     }
     

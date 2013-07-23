@@ -59,12 +59,6 @@
             <to uri="mock:result-inout-message-name"/>
         </route>
         
-        <route errorHandlerRef="inOutErrorHandler">
-            <from uri="direct:inout-wrong-message-name"/>
-            <to uri="avro:netty:localhost:{{avroport}}/wrongMessage?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol"/>
-            <to uri="mock:result-inout-message-name"/>
-        </route>
-        
         <route>
             <from uri="direct:inout-reflection"/>
             <to uri="avro:netty:localhost:{{avroPortReflection}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>

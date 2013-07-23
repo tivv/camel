@@ -34,11 +34,9 @@ import org.apache.camel.avro.test.TestReflectionImpl;
 import org.junit.Test;
 
 public abstract class AvroConsumerTestSupport extends AvroTestSupport {
-	
-	protected int avroPort = setupFreePort("avroport");
-	protected int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
+
+    protected int avroPortMessageInRoute = setupFreePort("avroPortMessageInRoute");
 	protected int avroPortForWrongMessages = setupFreePort("avroPortForWrongMessages");
-	protected int avroPortReflectionTest = setupFreePort("avroPortReflectionTest");
 
     Transceiver transceiver;
     Requestor requestor;
@@ -184,15 +182,5 @@ public abstract class AvroConsumerTestSupport extends AvroTestSupport {
         request = new Object[0];
         Object response = reflectRequestor.request("getTestPojo", request);
         Assert.assertEquals(testPojo.getPojoName(), ((TestPojo) response).getPojoName());
-    }
-
-    @Override
-    protected CamelContext createCamelContext() throws Exception {
-        CamelContext context = super.createCamelContext();
-        AvroConfiguration configuration = new AvroConfiguration();
-        AvroComponent component = new AvroComponent(context);
-        component.setConfiguration(configuration);
-        context.addComponent("avro", component);
-        return context;
     }
 }

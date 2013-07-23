@@ -44,7 +44,7 @@ public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
         transceiverForWrongMessages = new NettyTransceiver(new InetSocketAddress("localhost", avroPortForWrongMessages));
         requestorForWrongMessages = new SpecificRequestor(KeyValueProtocol.class, transceiverForWrongMessages);
         
-        reflectTransceiver = new NettyTransceiver(new InetSocketAddress("localhost", avroPortReflectionTest));
+        reflectTransceiver = new NettyTransceiver(new InetSocketAddress("localhost", avroPortReflection));
         reflectRequestor = new ReflectRequestor(TestReflection.class, reflectTransceiver);
     }
 
@@ -66,19 +66,19 @@ public class AvroNettyConsumerTest extends AvroConsumerTestSupport {
                 from("avro:netty:localhost:" + avroPortForWrongMessages + "/put?protocolClassName=org.apache.camel.avro.generated.KeyValueProtocol")
                 .process(new PutProcessor(keyValue));
                 
-                from("avro:netty:localhost:" + avroPortReflectionTest + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
+                from("avro:netty:localhost:" + avroPortReflection + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
                 .process(new ReflectionInOnlyProcessor(testReflection));
                 
-                from("avro:netty:localhost:" + avroPortReflectionTest + "/setAge?protocolClassName=org.apache.camel.avro.test.TestReflection")
+                from("avro:netty:localhost:" + avroPortReflection + "/setAge?protocolClassName=org.apache.camel.avro.test.TestReflection")
                 .process(new ReflectionInOnlyProcessor(testReflection));
                 
-                from("avro:http:localhost:" + avroPortReflectionTest + "/setTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
+                from("avro:http:localhost:" + avroPortReflection + "/setTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
                 .process(new ReflectionInOnlyProcessor(testReflection));
                 
-                from("avro:http:localhost:" + avroPortReflectionTest + "/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
+                from("avro:http:localhost:" + avroPortReflection + "/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
                 .process(new ReflectionInOutProcessor(testReflection));
                 
-                from("avro:netty:localhost:" + avroPortReflectionTest + "/getTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection")
+                from("avro:netty:localhost:" + avroPortReflection + "/getTestPojo?protocolClassName=org.apache.camel.avro.test.TestReflection")
                 .process(new ReflectionInOutProcessor(testReflection));
             }
         };

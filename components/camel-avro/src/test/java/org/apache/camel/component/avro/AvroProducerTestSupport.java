@@ -32,9 +32,6 @@ import org.junit.Test;
 
 public abstract class AvroProducerTestSupport extends AvroTestSupport {
 
-	protected int avroPort = setupFreePort("avroort");
-	protected int avroPortReflection = setupFreePort("avroPortReflection");
-	
     Server server;
     Server serverReflection;
     KeyValueProtocolImpl keyValue = new KeyValueProtocolImpl();
@@ -132,23 +129,6 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
     }
     
     @Test
-    public void testInOutWrongMessageNameInRoute() throws InterruptedException {
-        keyValue.getStore().clear();
-        Key key = Key.newBuilder().setKey("2").build();
-        Value value = Value.newBuilder().setValue("test value").build();
-        keyValue.getStore().put(key, value);
-
-        MockEndpoint mockErrorChannel = getMockEndpoint("mock:inout-message-name-error");
-        mockErrorChannel.expectedMessageCount(1);
-        mockErrorChannel.expectedBodiesReceived(key);
-        MockEndpoint mock = getMockEndpoint("mock:result-inout-message-name");
-        mock.expectedMessageCount(0);
-        template.sendBody("direct:inout-wrong-message-name", key);
-        mockErrorChannel.assertIsSatisfied(5000);
-        mock.assertIsSatisfied();
-    }
-    
-    @Test
     public void testInOutReflection() throws InterruptedException {
     	int age = 100;
         Object[] request = {age};
@@ -160,13 +140,4 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.assertIsSatisfied(5000);
     }
 
-    @Override
-    protected CamelContext createCamelContext() throws Exception {
-        CamelContext context = super.createCamelContext();
-        AvroConfiguration configuration = new AvroConfiguration();
-        AvroComponent component = new AvroComponent(context);
-        component.setConfiguration(configuration);
-        context.addComponent("avro", component);
-        return context;
-    }
 }

@@ -36,6 +36,7 @@ import org.apache.avro.specific.SpecificData;
 import org.apache.camel.Exchange;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.commons.lang.BooleanUtils;
+import org.omg.Dynamic.Parameter;
 
 public class AvroResponderUtil {
 
@@ -109,23 +110,16 @@ public class AvroResponderUtil {
 	 * @param	dataResolver Extracts type of parameters in call 
 	 * @return	Parameters of RPC method invocation
 	 */
-	static <T extends SpecificData> Object extractParams(Protocol.Message message, Object request, Boolean singleParameter, T dataResolver) {
-		int numParams = message.getRequest().getFields().size();
-        
-        if(BooleanUtils.isTrue(singleParameter) && numParams == 1) {
-        	Object param;
+	static Object extractParams(Protocol.Message message, Object request, boolean singleParameter, SpecificData dataResolver) {
+
+        if(singleParameter) {
         	Field field = message.getRequest().getFields().get(0);
-        	Class<?> paramType = dataResolver.getClass(field.schema());
-        	if(!paramType.isPrimitive() && ((GenericRecord) request).get(field.name()) != null)
-        		param = paramType.cast(((GenericRecord) request).get(field.name()));
-        	else
-        		param = ((GenericRecord) request).get(field.name());
-        	return param;
+        	return dataResolver.getField(request, field.name(), field.pos());
         } else {
         	int i = 0;
-        	Object[] params =  new Object[numParams];
+            Object[] params =  new Object[message.getRequest().getFields().size()];
 			for (Schema.Field param : message.getRequest().getFields()) {
-				params[i] = ((GenericRecord) request).get(param.name());
+				params[i] = dataResolver.getField(request, param.name(), param.pos());
 				i++;
 			}
 			return params;

@@ -23,12 +23,15 @@ import java.io.IOException;
 
 import java.util.Properties;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.junit4.CamelTestSupport;
 
 public class AvroTestSupport extends CamelTestSupport {
 
 	private int port = 9100;
+    protected int avroPort = setupFreePort("avroport");
+    protected int avroPortReflection = setupFreePort("avroPortReflection");
 
     public int setupFreePort(String name) {
         FileInputStream fis = null;
@@ -72,4 +75,13 @@ public class AvroTestSupport extends CamelTestSupport {
         return port;
     }
 
+    @Override
+    protected CamelContext createCamelContext() throws Exception {
+        CamelContext context = super.createCamelContext();
+        AvroConfiguration configuration = new AvroConfiguration();
+        AvroComponent component = new AvroComponent(context);
+        component.setConfiguration(configuration);
+        context.addComponent("avro", component);
+        return context;
+    }
 }
