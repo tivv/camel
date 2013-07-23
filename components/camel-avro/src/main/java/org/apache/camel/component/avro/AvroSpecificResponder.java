@@ -22,79 +22,23 @@ import java.util.concurrent.ConcurrentMap;
 import org.apache.avro.Protocol;
 import org.apache.avro.ipc.Server;
 import org.apache.avro.ipc.specific.SpecificResponder;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificData;
 import org.apache.commons.lang.StringUtils;
 import org.mortbay.log.Log;
 
-public class AvroSpecificResponder extends SpecificResponder implements AvroResponder {
+public class AvroSpecificResponder extends SpecificResponder {
+    private AvroListener listener;
 
-	private ConcurrentMap<String, AvroConsumer> consumerRegistry = new ConcurrentHashMap<String, AvroConsumer>();
-    private AvroConsumer defaultConsumer;
-    private Server server;
-    
-    public AvroSpecificResponder(AvroConsumer consumer)  throws Exception {
-        super(consumer.getEndpoint().getProtocol(), null);
-        server = AvroResponderUtil.initAndStartServer(server, this, consumer);
+
+    public AvroSpecificResponder(Protocol protocol, AvroListener listener)  throws Exception {
+        super(protocol, null);
+        this.listener = listener;
     }
 
     @Override
     public Object respond(Protocol.Message message, Object request) throws Exception {
-    	if((defaultConsumer==null) && (!getLocal().getMessages().containsKey(message.getName())))
-        	throw new AvroComponentException("No message with name: " + message.getName() + " mapped.");
-    	        
-        AvroConsumer consumer = this.defaultConsumer;
-        if(!StringUtils.isEmpty(message.getName()) && this.consumerRegistry.containsKey(message.getName()))
-        	consumer = this.consumerRegistry.get(message.getName());
-        
-        if(consumer == null) throw new AvroComponentException("No consumer defined for message: " + message.getName());
-        
-        Object params = AvroResponderUtil.extractParams(message, request, consumer.getEndpoint().getConfiguration().isSingleParameter(), SpecificData.get());
-        
-        return AvroResponderUtil.processExchange(consumer, message, params);
+        return listener.respond(message, request, SpecificData.get());
     }
-    
-    /**
-     * Registers consumer by appropriate message name as key in registry.
-     *  
-     * @param messageName	message name
-     * @param consumer		avro consumer
-     * @throws AvroComponentException
-     */
-    @Override
-    public void register(String messageName, AvroConsumer consumer) throws AvroComponentException {       
-    	if (messageName == null) {
-    		if(this.defaultConsumer != null)
-    			throw new AvroComponentException("Default consumer already registered for uri: " + consumer.getEndpoint().getEndpointUri());
-    		this.defaultConsumer = consumer;
-    	} else {
-    		if (consumerRegistry.putIfAbsent(messageName, consumer) != null) {
-    			throw new AvroComponentException("Consumer already registered for message: " + messageName + " and uri: " + consumer.getEndpoint().getEndpointUri());
-    		}
-    	}
-    }
-    
-    /**
-     * Unregisters consumer by message name.
-     * Stops server in case if all consumers are unregistered and default consumer is absent or stopped. 
-     * 
-     * @param messageName message name
-     * @return true if all consumers are unregistered and defaultConsumer is absent or null.
-     *         It means that this responder can be unregistered. 
-     */
-    @Override
-    public boolean unregister(String messageName) {
-    	if(!StringUtils.isEmpty(messageName)) {
-    		if(consumerRegistry.remove(messageName) == null)
-    			Log.warn("Consumer with message name " + messageName + " was already unregistered.");
-    	}
-    	else defaultConsumer = null;
-    	
-    	if((defaultConsumer == null) && (consumerRegistry.isEmpty())) {
-            if (server != null) {
-                server.close();
-            }
-    		return true; 
-    	}
-    	return false;
-    }
+
 }

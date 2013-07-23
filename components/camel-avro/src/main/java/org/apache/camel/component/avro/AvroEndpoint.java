@@ -78,7 +78,4 @@ public abstract class AvroEndpoint extends DefaultEndpoint {
         return configuration;
     }
 
-    public Protocol getProtocol() {
-        return configuration.getProtocol();
-    }
 }

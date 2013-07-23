@@ -34,7 +34,7 @@ import org.apache.camel.util.URISupport;
 public class AvroComponent extends DefaultComponent {
 
     private AvroConfiguration configuration;
-    private ConcurrentMap<String, AvroResponder> responderRegistry = new ConcurrentHashMap<String, AvroResponder>();
+    private ConcurrentMap<String, AvroListener> listenerRegistry = new ConcurrentHashMap<String, AvroListener>();
 
     public AvroComponent() {
     }
@@ -133,28 +133,23 @@ public class AvroComponent extends DefaultComponent {
      * @throws Exception
      */
     public void register(String uri, String messageName, AvroConsumer consumer) throws Exception {
-    	AvroResponder responder = responderRegistry.get(uri);
-    	if(responder == null) {
-    		if(consumer.getEndpoint().getConfiguration().isReflectionProtocol())
-    			responder = new AvroReflectResponder(consumer);
-    		else
-    			responder = new AvroSpecificResponder(consumer);
-    		
-    		responderRegistry.put(uri, responder);
+    	AvroListener listener = listenerRegistry.get(uri);
+    	if(listener == null) {
+    		listener = new AvroListener(consumer.getEndpoint());
+    		listenerRegistry.put(uri, listener);
     	}
-    	responder.register(messageName, consumer);
+    	listener.register(messageName, consumer);
     }
     
     /**
      * Calls unregister of consumer by appropriate message name.
      * In case if all consumers are unregistered then it removes responder from the registry.
-     * 
+     *
      * @param uri			URI of the endpoint without message name
      * @param messageName	message name
-     * @param consumer		consumer that will be unregistered in providers` registry
      */
-    public void unregister(String uri, String messageName, AvroConsumer consumer) {
-    	if(responderRegistry.get(uri).unregister(messageName)) responderRegistry.remove(uri);
+    public void unregister(String uri, String messageName) {
+    	if(listenerRegistry.get(uri).unregister(messageName)) listenerRegistry.remove(uri);
     }
 
     public AvroConfiguration getConfiguration() {
