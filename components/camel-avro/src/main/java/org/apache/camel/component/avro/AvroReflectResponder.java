@@ -39,7 +39,7 @@ public class AvroReflectResponder extends ReflectResponder implements
     }
 	
 	@Override
-    public Object respond(Protocol.Message message, Object request) throws AvroComponentException {
+    public Object respond(Protocol.Message message, Object request) throws Exception {
     	if((defaultConsumer==null) && (!getLocal().getMessages().containsKey(message.getName())))
         	throw new AvroComponentException("No message with name: " + message.getName() + " mapped.");
         

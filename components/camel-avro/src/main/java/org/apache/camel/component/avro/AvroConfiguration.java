@@ -36,6 +36,7 @@ public class AvroConfiguration implements Cloneable {
     private String messageName;
     private String uriAuthority;
     private boolean isReflectionProtocol;
+    private Boolean singleParameter;
 
 	public AvroConfiguration copy() {
         try {
@@ -135,5 +136,13 @@ public class AvroConfiguration implements Cloneable {
 
 	public void setReflectionProtocol(boolean isReflectionProtocol) {
 		this.isReflectionProtocol = isReflectionProtocol;
+	}
+
+	public Boolean getSingleParameter() {
+		return singleParameter;
+	}
+
+	public void setSingleParameter(Boolean singleParameter) {
+		this.singleParameter = singleParameter;
 	}
 }

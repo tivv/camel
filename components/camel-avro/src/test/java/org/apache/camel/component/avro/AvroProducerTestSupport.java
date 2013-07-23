@@ -78,7 +78,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         Object[] request = {key, value};
         template.sendBody("direct:in-message-name", request);
         Assert.assertEquals(value, keyValue.getStore().get(key));
-        mock.assertIsSatisfied(10000);
+        mock.assertIsSatisfied(5000);
     }
     
     @Test
@@ -99,8 +99,8 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         Value value = Value.newBuilder().setValue("test value").build();
         Object[] request = {key, value};
         template.sendBodyAndHeader("direct:in-message-name", request, AvroConstants.AVRO_MESSAGE_NAME, "/get");
-        mockErrorChannel.assertIsSatisfied(10000);
-        mockInMessageEnd.assertIsSatisfied(10000);
+        mockErrorChannel.assertIsSatisfied(5000);
+        mockInMessageEnd.assertIsSatisfied();
     }
 
     @Test
@@ -114,7 +114,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived(value);
         template.sendBodyAndHeader("direct:inout", key, AvroConstants.AVRO_MESSAGE_NAME, "get");
-        mock.assertIsSatisfied(10000);
+        mock.assertIsSatisfied(5000);
     }
     
     @Test
@@ -128,7 +128,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived(value);
         template.sendBody("direct:inout-message-name", key);
-        mock.assertIsSatisfied(10000);
+        mock.assertIsSatisfied(5000);
     }
     
     @Test
@@ -144,8 +144,8 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         MockEndpoint mock = getMockEndpoint("mock:result-inout-message-name");
         mock.expectedMessageCount(0);
         template.sendBody("direct:inout-wrong-message-name", key);
-        mockErrorChannel.assertIsSatisfied(10000);
-        mock.assertIsSatisfied(10000);
+        mockErrorChannel.assertIsSatisfied(5000);
+        mock.assertIsSatisfied();
     }
     
     @Test
@@ -157,7 +157,7 @@ public abstract class AvroProducerTestSupport extends AvroTestSupport {
         mock.expectedMessageCount(1);
         mock.expectedBodiesReceived(++age);
         template.sendBody("direct:inout-reflection", request);
-        mock.assertIsSatisfied(10000);
+        mock.assertIsSatisfied(5000);
     }
 
     @Override

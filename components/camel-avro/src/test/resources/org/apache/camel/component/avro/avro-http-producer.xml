@@ -44,7 +44,7 @@
         
         <route>
             <from uri="direct:in-reflection"/>
-            <to uri="avro:http:localhost:{{avroPortReflection}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <to uri="avro:http:localhost:{{avroPortReflection}}/setName?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>
         </route>
 
         <route>
@@ -67,7 +67,7 @@
         
         <route>
             <from uri="direct:inout-reflection"/>
-            <to uri="avro:http:localhost:{{avroPortReflection}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection"/>
+            <to uri="avro:http:localhost:{{avroPortReflection}}/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&amp;singleParameter=true"/>
             <to uri="mock:result-inout-reflection"/>
         </route>
 

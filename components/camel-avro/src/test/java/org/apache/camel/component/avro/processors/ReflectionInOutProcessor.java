@@ -16,8 +16,6 @@
  */
 package org.apache.camel.component.avro.processors;
 
-import java.util.List;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.avro.test.TestReflection;
@@ -38,13 +36,6 @@ public class ReflectionInOutProcessor implements Processor {
             exchange.getOut().setBody(testReflection.getTestPojo());
         } else if (body instanceof Object) {
             exchange.getOut().setBody(testReflection.increaseAge((Integer) body));
-        }
-        
-        if (body instanceof List<?>) {
-            List<Object> args = (List<Object>) body;
-            if (args.size() == 1 && args.get(0) instanceof Integer) {
-            	exchange.getOut().setBody(testReflection.increaseAge((Integer) args.get(0)));
-            }
         }
     }
 }

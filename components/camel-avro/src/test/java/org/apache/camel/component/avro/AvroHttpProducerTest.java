@@ -57,7 +57,7 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
                 
                 //In Only with existing interface
                 from("direct:in-reflection")
-                .to("avro:http:localhost:" + avroPortReflection + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection");
+                .to("avro:http:localhost:" + avroPortReflection + "/setName?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true");
 
                 //InOut
                 from("direct:inout")
@@ -77,7 +77,7 @@ public class AvroHttpProducerTest extends AvroProducerTestSupport {
                 
                 //InOut with existing interface
                 from("direct:inout-reflection")
-                .to("avro:http:localhost:" + avroPortReflection + "/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection")
+                .to("avro:http:localhost:" + avroPortReflection + "/increaseAge?protocolClassName=org.apache.camel.avro.test.TestReflection&singleParameter=true")
                 .to("mock:result-inout-reflection");
             }
         };
